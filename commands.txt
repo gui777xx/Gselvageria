@@ -16,9 +16,15 @@ dotnet add package MySql.EntityFrameworkCore --version 9.0.0
 
 Abrir o arquivo .csproj
 
-
+<Nullable>disable</Nullable>
 
 Camada de Dado (Models)
+
+Criar o Contexto na pasta Data
+
+Configurar a connectionstring no arquivo appsettings.json
+
+Configurar os Serviços de Contexto e identidade no Program.cs
 
 
 

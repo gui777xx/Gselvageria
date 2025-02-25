@@ -5,7 +5,7 @@ namespace Gselvageria.Models;
 
 [Table("produto")]
 public class Produto
-{   
+{
     [Key]
     public int Id { get; set; }
 
@@ -28,9 +28,13 @@ public class Produto
 
     [Required(ErrorMessage = "por favor, informe o valor de custo")]
     [Column(TypeName = "numeric(10,2)")]
-    public decimal ValorCusto  { get; set; }
+    public decimal ValorCusto { get; set; }
 
     [Required(ErrorMessage = "por favor, informe o valor de custo")]
     [Column(TypeName = "numeric(10,2)")]
-    public decimal ValorVenda  { get; set; }
-}   
+    public decimal ValorVenda { get; set; }
+
+    public bool Destaque { get; set; } = false;
+
+    public List<ProdutoFoto> MyProperty { get; set; }
+}
