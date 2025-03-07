@@ -24,7 +24,7 @@ public class Produto
     public string Descricao { get; set; }
 
     [Required(ErrorMessage = "Por favor, informe a quantidade em estoque")]
-    public int qtdeEstoque { get; set; } = 0;
+    public int QtdeEstoque { get; set; } = 0;
 
     [Required(ErrorMessage = "por favor, informe o valor de custo")]
     [Column(TypeName = "numeric(10,2)")]
@@ -36,5 +36,5 @@ public class Produto
 
     public bool Destaque { get; set; } = false;
 
-    public List<ProdutoFoto> MyProperty { get; set; }
+    public List<ProdutoFoto> Fotos { get; set; }
 }
