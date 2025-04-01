@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Gselvageria.Models;
 using Gselvageria.Data;
 using Microsoft.EntityFrameworkCore;
+using Gselvageria.ViewModels;
 
 namespace Gselvageria.Controllers;
 
@@ -35,9 +36,20 @@ public class HomeController : Controller
         .Include(p => p.Categoria)
         .Include(p => p.Fotos)
         .SingleOrDefault();
-        return View(produto);
+
+        List<Produto> semelhantes = _db.Produtos
+        .Where(p => p.CategoriaId == produto.CategoriaId && p.Id != id)
+        .Include(p => p.Fotos)
+        .Take(4)
+        .ToList();
+
+        ProdutoVM produtoVM = new(){
+            Produto = produto,
+            Semelhantes = semelhantes
+        };
+        return View(produtoVM);
     }
-  
+
     public IActionResult Privacy()
     {
         return View();
