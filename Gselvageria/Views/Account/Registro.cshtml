@@ -69,20 +69,27 @@
     <partial name="_ValidationScriptsPartial.cshtml"></partial>
     <script type="text/javascript">
     let mensagemErro = '';
-    $(".ValidationSummary").on("click", function () {
+    $(".ValidationSummary-errors ul li").each(function () {
+        mensagemErro += $(this).text() + '<br />';
+    });
+    if (mensagemErro != '')
+        swal.fire(
+            'Acesso Negado',
+            mensagemErro,
+            'error'
+        );
+
         function changeImage() {
             document.querySelector('input[type="file"]').click();
         }
 
-        document.querySelector('input[type="file"]').addEventListener('change', function (event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById('PreviewImage').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
+    window.addEventListener('load', function () {
+        document.querySelector('input[type="file"]').addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    var img = document.getElementById('PreviewImage');
+                    img.scr URL.createObjectURL(this.files[0]);
+             }
+        });
         });
     </script>
 }
