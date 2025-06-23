@@ -1,5 +1,7 @@
 using System.Net.Mail;
 using System.Security.Claims;
+using Gselvageria.Data;
+using Gselvageria.Helpers;
 using Gselvageria.Models;
 using Gselvageria.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -12,18 +14,21 @@ public class AccountController : Controller
     private readonly SignInManager<Usuario> _signInManager;
     private readonly UserManager<Usuario> _userManager;
     private readonly IWebHostEnvironment _host;
+    private readonly AppDbContext _db;
 
     public AccountController(
         ILogger<AccountController> logger,
         SignInManager<Usuario> signInManager,
         UserManager<Usuario> userManager,
-        IWebHostEnvironment host
+        IWebHostEnvironment host,
+        AppDbContext db
         )
     {
         _logger = logger;
         _signInManager = signInManager;
         _userManager = userManager;
         _host = host;
+        _db = db;
     }
 
     [HttpGet]
@@ -79,20 +84,57 @@ public class AccountController : Controller
         return View(login);
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Logout()
-    {
-        _logger.LogInformation($"Usuário {ClaimTypes.Email} fez logoff");
-        await _signInManager.SignOutAsync();
-        return RedirectToAction("Index", "Home");
-    }
-
     [HttpGet]
     public IActionResult Registro()
     {
         RegistroVM register = new();
         return View(register);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Registro(RegistroVM registro)
+    {
+        if (ModelState.IsValid)
+        {
+            var usuario = Activator.CreateInstance<Usuario>();
+            usuario.Nome = registro.Nome;
+            usuario.DataNascimento = registro.DataNascimento;
+            usuario.UserName = registro.Email;
+            usuario.NormalizedUserName = registro.Email.ToUpper();
+            usuario.Email = registro.Email;
+            usuario.NormalizedEmail = registro.Email.ToUpper();
+            usuario.EmailConfirmed = true;
+            var result = await _userManager.CreateAsync(usuario, registro.Senha);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation($"Novo usuario registrado com o email {registro.Email}");
+
+                await _userManager.AddToRoleAsync(usuario, "Cliente");
+
+                if (registro.Foto != null)
+                {
+                    string nomeArquivo = usuario.Id + Path.GetExtension(registro.Foto.FileName);
+                    string caminho = Path.Combine(_host.WebRootPath, @"img\usuarios");
+                    string novoArquivo = Path.Combine(caminho, nomeArquivo);
+                    using (var stream = new FileStream(novoArquivo, FileMode.Create))
+                    {
+                        registro.Foto.CopyTo(stream);
+                    }
+
+                    usuario.Foto = @"\img\usuarios\" + nomeArquivo;
+                    await _db.SaveChangesAsync();
+                }
+
+                TempData["Sucesso"] = "Conta Criada com Sucesso!";
+                return RedirectToAction(nameof(Login));
+            }
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, TranslateIdentityErrors.TranslateErrorMessage(error.Code));
+        }
+        return View(registro);
     }
 
     public bool IsValidEmail(string email)
